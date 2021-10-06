@@ -1,0 +1,9 @@
+osx_image: xcode12.5
+language: objective-c
+env:
+  matrix:
+  - TEST_SDK=iphonesimulator14.5 OS=14.5 NAME='iPhone 12'
+  - TEST_SDK=iphonesimulator14.5 OS=12.0 NAME='iPhone 7'
+
+script:
+- set -o pipefail && xcodebuild test -enableCodeCoverage YES -workspace Example/MurkyVideoPlayer.xcworkspace -scheme MurkyVideoPlayer-Example -sdk $TEST_SDK -destination "platform=iOS Simulator,OS=$OS,name=$NAME" ONLY_ACTIVE_ARCH=YES | xcpretty
