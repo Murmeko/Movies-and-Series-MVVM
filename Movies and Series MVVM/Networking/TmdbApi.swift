@@ -7,12 +7,18 @@
 
 import Moya
 
-enum TmdbApi {
+enum TmdbMethods {
+    case getPopularMovies
+    case getPopularSeries
+    case getMovieDetails
+    case getSeriesDetails
+}
 
-    case getPopularMovies(_ page: Int)
-    case getPopularSeries(_ page: Int)
-    case getMovieDetails(_ movieId: Int)
-    case getSeriesDetails(_ seriesId: Int)
+struct TmdbApi {
+    let apiMethods: TmdbMethods
+    var page: Int?
+    var movieId: Int?
+    var seriesId: Int?
 }
 
 extension TmdbApi: TargetType {
@@ -22,15 +28,15 @@ extension TmdbApi: TargetType {
     }
 
     var path: String {
-        switch self {
-        case .getPopularMovies(let page):
-            return "/movie/popular&language=en-US&page=\(page)"
-        case .getPopularSeries(let page):
-            return "/tv/popular&language=en-US&page=\(page)"
-        case .getMovieDetails(let movieId):
-            return "/movie/\(movieId)&language=en-US"
-        case .getSeriesDetails(let seriesId):
-            return "/tv/\(seriesId)&language=en-US"
+        switch apiMethods {
+        case .getPopularMovies:
+            return "/movie/popular"
+        case .getPopularSeries:
+            return "/tv/popular"
+        case .getMovieDetails:
+            return "/movie/\(movieId ?? 0)"
+        case .getSeriesDetails:
+            return "/tv/\(seriesId ?? 0)"
         }
     }
 
@@ -42,13 +48,27 @@ extension TmdbApi: TargetType {
     }
 
     var task: Task {
-        switch self {
-        default:
-            return .requestPlain
+        switch apiMethods {
+        case .getPopularMovies:
+            return .requestParameters(parameters: ["language" : "en-US",
+                                                   "page" : "\(page ?? 1)"], encoding: URLEncoding.default)
+        case .getPopularSeries:
+            return .requestParameters(parameters: ["language" : "en-US",
+                                                   "page" : "\(page ?? 1)"], encoding: URLEncoding.default)
+        case .getMovieDetails:
+            return .requestParameters(parameters: ["language" : "en-US"], encoding: URLEncoding.default)
+        case .getSeriesDetails:
+            return .requestParameters(parameters: ["language" : "en-US"], encoding: URLEncoding.default)
         }
     }
 
     var headers: [String : String]? {
         return ["Content-type": "application/json"]
+    }
+}
+
+extension TmdbApi: AccessTokenAuthorizable {
+    var authorizationType: AuthorizationType? {
+        return .bearer
     }
 }
