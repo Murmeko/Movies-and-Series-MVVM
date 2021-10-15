@@ -11,6 +11,8 @@ class MoviesCollectionViewController: UICollectionViewController {
 
     @IBOutlet var moviesCollectionView: UICollectionView!
 
+    let moviesViewModel = MoviesViewModel()
+
     func setupFlowLayout() {
         if let flowLayout = moviesCollectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             flowLayout.minimumLineSpacing = 10
@@ -25,13 +27,16 @@ class MoviesCollectionViewController: UICollectionViewController {
 
     func setupCollectionView() {
         moviesCollectionView.register(
-            UINib(nibName: K.moviesCollectionCellNibName, bundle: nil),
-            forCellWithReuseIdentifier: K.moviesCollectionCellReuseIdentifier)
+            UINib(nibName: Constants.moviesCollectionCellNibName, bundle: nil),
+            forCellWithReuseIdentifier: Constants.moviesCollectionCellReuseIdentifier)
 
         moviesCollectionView.dataSource = self
         moviesCollectionView.delegate = self
 
         setupFlowLayout()
+        moviesViewModel.reloadData = { DispatchQueue.main.async {
+            self.moviesCollectionView.reloadData()
+        }}
     }
 
     override func viewDidLoad() {
@@ -47,18 +52,27 @@ class MoviesCollectionViewController: UICollectionViewController {
         return 1
     }
 
-
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    override func collectionView(_ collectionView: UICollectionView,
+                                 numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return 10
+        return moviesViewModel.viewModelCount()
     }
 
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: K.moviesCollectionCellReuseIdentifier, for: indexPath) as! MoviesCollectionCell
-    
-        // Configure the cell
-    
+    override func collectionView(_ collectionView: UICollectionView,
+                                 cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: Constants.moviesCollectionCellReuseIdentifier,
+            for: indexPath) as! MoviesCollectionCell
+
+        cell.configure(with: moviesViewModel.getViewModelAtIndexPath(indexPath))
         return cell
+    }
+
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y > scrollView.contentSize.height - scrollView.frame.size.height {
+            moviesViewModel.getMoviesList()
+        }
     }
 
     // MARK: UICollectionViewDelegate

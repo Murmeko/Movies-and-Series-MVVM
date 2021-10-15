@@ -7,7 +7,40 @@
 		<key>Movies and Series MVVM.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>6</integer>
+			<integer>0</integer>
+		</dict>
+		<key>PopularMoviesWidgetExtension.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>1B7D1CDF27171534002EB97C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1B7D1CF227171FE1002EB97C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1BB79FC8270D488500859221</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1BB79FDE270D488800859221</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1BB79FE8270D488800859221</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

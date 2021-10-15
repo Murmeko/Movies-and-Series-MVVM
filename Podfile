@@ -18,4 +18,10 @@ target 'Movies and Series MVVM' do
     # Pods for testing
   end
 
+  target 'PopularMoviesWidgetExtension' do
+    # Pods for PopularMoviesWidget
+    pod 'Moya', '~> 15.0'
+    pod 'Kingfisher', '~> 7.0'
+  end
+
 end
