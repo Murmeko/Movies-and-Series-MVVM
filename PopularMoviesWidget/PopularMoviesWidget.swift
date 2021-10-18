@@ -16,7 +16,7 @@ struct PopularMoviesWidgetEntryView : View {
 
         ZStack(alignment: .topTrailing) {
 
-            NetworkImage(url: URL(string: entry.moviePosterUrlString))
+            Image(uiImage: entry.posterImage).resizable()
 
             LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .top, endPoint: .bottom).opacity(0.5)
 

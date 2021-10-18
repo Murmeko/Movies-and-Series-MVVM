@@ -7,17 +7,15 @@
 
 import Moya
 import Kingfisher
+import UIKit
 
 struct NetworkManager {
-
     enum FetchPopularRequest {
-
         case movies(page: Int)
         case series(page: Int)
     }
 
     enum FetchDetailsRequest {
-
         case movie(movieId: Int)
         case series(seriesId: Int)
     }
@@ -25,20 +23,18 @@ struct NetworkManager {
     private var provider = MoyaProvider<TmdbApi>()
 
     init() {
-
         let token = Constants.apiToken
         let authPlugin = AccessTokenPlugin { _ in token }
         self.provider = MoyaProvider<TmdbApi>(plugins: [authPlugin])
     }
 
     func fetchPopular(request: FetchPopularRequest, completion: @escaping (Result<Codable, Error>) -> Void) {
-
         switch request {
         case .movies(let page):
             provider.request(.init(apiMethods: .getPopularMovies,
-                                   page: page)) { result in
-                decodeResult(PopularMoviesModel.self, result) { (result) in
-                    switch result {
+                                   page: page)) { moyaResult in
+                decodeResult(PopularMoviesModel.self, moyaResult) { (decodeResult) in
+                    switch decodeResult {
                     case .success(let decodedModel):
                         completion(.success(decodedModel))
                     case .failure(let decoderError):
@@ -49,9 +45,9 @@ struct NetworkManager {
 
         case .series(let page):
             provider.request(.init(apiMethods: .getPopularSeries,
-                                   page: page)) { result in
-                decodeResult(PopularSeriesModel.self, result) { (result) in
-                    switch result {
+                                   page: page)) { moyaResult in
+                decodeResult(PopularSeriesModel.self, moyaResult) { (decodeResult) in
+                    switch decodeResult {
                     case .success(let decodedModel):
                         completion(.success(decodedModel))
                     case .failure(let decoderError):
@@ -63,13 +59,12 @@ struct NetworkManager {
     }
 
     func fetchDetails(request: FetchDetailsRequest, completion: @escaping (Result<Codable, Error>) -> Void) {
-
         switch request {
         case .movie(let movieId):
             provider.request(.init(apiMethods: .getMovieDetails,
-                                   movieId: movieId)) { result in
-                decodeResult(MovieDetailsModel.self, result) { (result) in
-                    switch result {
+                                   movieId: movieId)) { moyaResult in
+                decodeResult(MovieDetailsModel.self, moyaResult) { (decodeResult) in
+                    switch decodeResult {
                     case .success(let decodedModel):
                         completion(.success(decodedModel))
                     case .failure(let decoderError):
@@ -80,9 +75,9 @@ struct NetworkManager {
 
         case .series(let seriesId):
             provider.request(.init(apiMethods: .getSeriesDetails,
-                                   seriesId: seriesId)) { result in
-                decodeResult(SeriesDetailsModel.self, result) { (result) in
-                    switch result {
+                                   seriesId: seriesId)) { moyaResult in
+                decodeResult(SeriesDetailsModel.self, moyaResult) { (decodeResult) in
+                    switch decodeResult {
                     case .success(let decodedModel):
                         completion(.success(decodedModel))
                     case .failure(let decoderError):
@@ -90,6 +85,45 @@ struct NetworkManager {
                     }
                 }
             }
+        }
+    }
+
+    func fetchMoviesForWidget(completion: @escaping ([PopularMoviesResult]?) -> Void) {
+        provider.request(.init(apiMethods: .getPopularMovies, page: 1)) { moyaResult in
+            decodeResult(PopularMoviesModel.self, moyaResult) { (decodeResult) in
+                switch decodeResult {
+                case .success(let model):
+                    var movies: [PopularMoviesResult] = []
+
+                    guard let castedModel = model as? PopularMoviesModel else { return }
+
+                    for movie in castedModel.results {
+                        movies.append(movie)
+                    }
+                    completion(movies)
+                case .failure(let error):
+                    print(error)
+                    completion(nil)
+                }
+            }
+        }
+    }
+
+    func fetchImage(_ imageUrl: URL?, completion: @escaping ((UIImage) -> Void)) {
+        let placeholder = UIImage(named: "doge")!
+        if let safeImageUrl = imageUrl {
+            let resource = ImageResource(downloadURL: safeImageUrl)
+            KingfisherManager.shared.retrieveImage(with: resource) { imageResult in
+                switch imageResult {
+                case .success(let imageData):
+                    completion(imageData.image)
+                case .failure(let imageError):
+                    print(imageError)
+                    completion(placeholder)
+                }
+            }
+        } else {
+            completion(placeholder)
         }
     }
 
